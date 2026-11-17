@@ -18,13 +18,15 @@ function getEventIdFromUrl() {
 
 function describeCallToAction(event) {
   if (getSeatStatus(event) === "full")
-    return "Sự kiện đã đủ chỗ - theo dõi các  sự kiện khác nhé";
-  return `Còn ${getSeatsLeft(event)} chỗ. Đăng ký tham gia cần tài khoản thành viên`;
+    return "Sự kiện đã đủ chỗ — theo dõi các sự kiện khác nhé.";
+  return `Còn ${getSeatsLeft(event)} chỗ. Đăng ký tham gia cần tài khoản thành viên.`;
 }
 
 function fillDetail(event, clubName) {
-  document.title = `${event.name} EduHub Web`;
-  field("meta").releaceWith(createEventMeta(event, clubName));
+  // Tiêu đề tab trình duyệt đổi theo sự kiện
+  document.title = `${event.name} · EduHub Web`;
+
+  field("meta").replaceWith(createEventMeta(event, clubName));
   field("name").textContent = event.name;
   field("club").textContent = clubName;
   field("time").replaceChildren(createTime(event.startTime));
@@ -37,6 +39,7 @@ function fillDetail(event, clubName) {
   const image = field("image");
   image.src = getClubImage(event.clubId);
   image.alt = `Biểu tượng ${clubName}`;
+
   statusBox.replaceChildren();
   article.hidden = false;
 }
@@ -47,7 +50,7 @@ async function loadDetail() {
     renderStatus(
       statusBox,
       "empty",
-      "TODO(ch3-T5): đọc ?id= trên URL rồi tải sự kiện.",
+      "Đường dẫn thiếu mã sự kiện. Hãy chọn một sự kiện trong lịch.",
     );
     return;
   }
@@ -55,6 +58,7 @@ async function loadDetail() {
   renderStatus(statusBox, "loading", "Đang tải sự kiện…");
   try {
     const event = await getEvent(id);
+    // Tên CLB chỉ để hiển thị: lỗi thì dùng chữ chung, không làm hỏng cả trang
     const club = await getClub(event.clubId).catch(() => null);
     fillDetail(event, club?.name ?? "Câu lạc bộ");
   } catch (error) {
@@ -62,15 +66,14 @@ async function loadDetail() {
       renderStatus(
         statusBox,
         "empty",
-        "Không tìm thấy sự kiện này. Có thể sự kiện đã bị xóa",
+        "Không tìm thấy sự kiện này. Có thể sự kiện đã bị xoá.",
       );
     } else {
       renderStatus(statusBox, "error", error.message, {
         label: "Thử lại",
-        onclick: loadDetail,
+        onClick: loadDetail,
       });
     }
-    renderStatus(statusBox, "error", error.message);
   }
 }
 
